@@ -63,7 +63,7 @@ public class UserRepository {
     public User save(User user) {
         if (user.getId() == null) {
             // Insert new user
-            String sql = "INSERT INTO users(username, password, role) VALUES(?, ?, ?) RETURNING id";
+            String sql = "INSERT INTO users(username, password, role) VALUES(?, ?, ?::user_role) RETURNING id";
             Long id = jdbcTemplate.queryForObject(sql, Long.class,
                     user.getUsername(),
                     user.getPassword(),

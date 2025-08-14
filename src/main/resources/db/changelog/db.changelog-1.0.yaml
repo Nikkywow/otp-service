@@ -29,6 +29,7 @@ databaseChangeLog:
                   type: VARCHAR(50)
                   constraints:
                     nullable: false
+
   - changeSet:
       id: 2
       author: system
@@ -53,6 +54,7 @@ databaseChangeLog:
                   type: INTEGER
                   constraints:
                     nullable: false
+
   - changeSet:
       id: 3
       author: system
@@ -93,25 +95,40 @@ databaseChangeLog:
               - column:
                   name: operation_id
                   type: VARCHAR(255)
+
   - changeSet:
       id: 4
       author: system
       changes:
+        - preConditions:
+            - onFail: MARK_RAN
+            - not:
+                - sqlCheck:
+                    expectedResult: 1
+                    sql: "SELECT COUNT(*) FROM pg_type WHERE typname = 'user_role'"
         - sql:
             sql: CREATE TYPE user_role AS ENUM ('ADMIN', 'USER')
         - sql:
             sql: ALTER TABLE users ALTER COLUMN role TYPE user_role USING role::user_role
+
   - changeSet:
       id: 5
       author: system
       changes:
+        - preConditions:
+            - onFail: MARK_RAN
+            - not:
+                - sqlCheck:
+                    expectedResult: 1
+                    sql: "SELECT COUNT(*) FROM pg_type WHERE typname = 'otp_status'"
         - sql:
             sql: CREATE TYPE otp_status AS ENUM ('ACTIVE', 'EXPIRED', 'USED')
         - sql:
             sql: ALTER TABLE otp_codes ALTER COLUMN status TYPE otp_status USING status::otp_status
+
   - changeSet:
       id: 6
       author: system
       changes:
         - sql:
-            sql: INSERT INTO otp_config (code_length, expiration_time) VALUES (6, 300)
+            sql: INSERT INTO otp_config (code_length, expiration_time) VALUES (6, 300) ON CONFLICT DO NOTHING
